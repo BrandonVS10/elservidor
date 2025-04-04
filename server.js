@@ -1,3 +1,4 @@
+
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
@@ -13,11 +14,9 @@ dotenv.config();
 app.use(express.json());  // Para manejar peticiones JSON
 app.use(cors());          // Permitir solicitudes desde diferentes orígenes
 
-
 // Conectar a MongoDB
 mongoose.connect(process.env.MONGO_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
+  useUnifiedTopology: true,  // Solo mantuvimos esta opción
 }).then(() => console.log('✅ Conectado a MongoDB'))
   .catch(err => console.error('❌ Error de conexión:', err));
 
@@ -27,5 +26,4 @@ app.use('/auth', authRoutes);
 // Iniciar servidor
 app.listen(PORT, () => {
   console.log(`🚀 Servidor en el puerto ${PORT}`);
-
 });

@@ -13,6 +13,8 @@ router.post('/register', async (req, res) => {
   // Detectar si la solicitud viene del Service Worker
   const isFromSW = req.headers['x-from-service-worker'] === 'true';
   if (isFromSW) {
+
+
     console.log('📦 Registro recibido desde Service Worker (sync)');
   }
 
