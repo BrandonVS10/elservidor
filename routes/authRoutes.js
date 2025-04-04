@@ -10,6 +10,12 @@ const router = express.Router();
 router.post('/register', async (req, res) => {
   const { nombre, email, password } = req.body;
 
+  // Detectar si la solicitud viene del Service Worker
+  const isFromSW = req.headers['x-from-service-worker'] === 'true';
+  if (isFromSW) {
+    console.log('📦 Registro recibido desde Service Worker (sync)');
+  }
+
   try {
     if (!nombre || !email || !password) {
       return res.status(400).json({ message: 'Nombre, correo y contraseña son requeridos' });
@@ -18,6 +24,10 @@ router.post('/register', async (req, res) => {
     // Verificar si el usuario ya existe
     const existingUser = await User.findOne({ email });
     if (existingUser) {
+      if (isFromSW) {
+        // Si ya existe y viene del SW, responder con éxito para continuar sync
+        return res.status(200).json({ message: 'Usuario ya registrado previamente' });
+      }
       return res.status(400).json({ message: 'El correo ya está registrado' });
     }
 
@@ -32,7 +42,6 @@ router.post('/register', async (req, res) => {
   }
 });
 
-
 // Iniciar sesión
 router.post('/login', async (req, res) => {
   const { email, password } = req.body;
@@ -44,7 +53,7 @@ router.post('/login', async (req, res) => {
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) return res.status(400).json({ message: 'Contraseña incorrecta' });
 
-    res.json({ message: 'Login exitoso', user});
+    res.json({ message: 'Login exitoso', user });
   } catch (err) {
     res.status(500).json({ message: 'Error en el servidor', error: err.message });
   }
@@ -91,7 +100,6 @@ router.post('/suscripcionMod', async (req, res) => {
 
   try {
     await sends(suscripcion, mensaje);
-
     res.status(200).json({ message: 'Mensaje enviado' });
   } catch (error) {
     res.status(500).json({ message: error.message });
